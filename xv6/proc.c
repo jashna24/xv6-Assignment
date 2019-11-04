@@ -378,35 +378,76 @@ scheduler(void)
   struct cpu *c = mycpu();
   c->proc = 0;
   
-  for(;;){
+  for(;;)
+  {
     // Enable interrupts on this processor.
     sti();
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
-    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
+    #ifdef DEFAULT
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+      {
+        // min_ctime = min_ctime; 
+      	// {
+  	        if(p->state != RUNNABLE)
+  	          continue;
+  	        c->proc = p;
+  	        switchuvm(p);
+  	        p->state = RUNNING;
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
-      p->state = RUNNING;
+  	        swtch(&(c->scheduler), p->context);
+  	        switchkvm();
+  	        c->proc = 0;
+  	    // }    
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
-    }
+        // Switch to chosen process.  It is the process's job
+        // to release ptable.lock and then reacquire it
+        // before jumping back to us.
+      }
+
+    #else
+      #ifdef FCFS
+        struct proc *min_ctime = 0;
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+        {
+          if(p->state != RUNNABLE)
+          continue;
+
+          if(min_ctime != 0)
+          {
+            if(p->stime < min_ctime->stime)
+              min_ctime = p;
+          }
+          else
+          {
+            min_ctime = p;
+          }
+        }
+
+        if(min_ctime !=0)
+        {  
+          p = min_ctime;
+          c->proc = p;
+          switchuvm(p);
+          p->state = RUNNING;
+
+          swtch(&(c->scheduler), c->proc->context);
+          switchkvm();
+        } 
+
+        // c->proc = 0;
+
+
+        #endif    
+        #endif    
+
     release(&ptable.lock);
 
   }
 }
-
+  
 // Enter scheduler.  Must hold only ptable.lock
 // and have changed proc->state. Saves and restores
 // intena because intena is a property of this

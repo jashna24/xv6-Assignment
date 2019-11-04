@@ -31,7 +31,6 @@ int main(int argc, char *argv[])
 
 	else
 	{	
-		printf(1,"%d\n",pid);
 		status = waitx(&wait_time, &run_time);
 		printf(1,"run time: %d, wait time: %d and status: %d\n",run_time,wait_time,status);
 	}
