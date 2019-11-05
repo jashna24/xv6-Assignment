@@ -51,6 +51,7 @@ struct proc {
   int priority;
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+  int num_run;
   int stime;
   int etime; 
   int rtime;

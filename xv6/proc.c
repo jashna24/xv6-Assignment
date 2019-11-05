@@ -97,6 +97,7 @@ found:
   p->etime  = 0;
   p->rtime  = 0;
   p->iotime = 0;
+  p->num_run = 0;
 
   release(&ptable.lock);
 
@@ -439,53 +440,37 @@ scheduler(void)
     #else
       #ifdef PRIORITY
         acquire(&ptable.lock);
-        struct proc *q;
         struct proc *maxP = 0;
         for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
         {
           if(p->state != RUNNABLE)
           continue;
-          maxP = p;
-          for(q = ptable.proc; q < &ptable.proc[NPROC]; q++)
+
+          if(maxP == 0)
           {
-            if(q->state != RUNNABLE)
-              continue;
-            if(maxP->priority > q->priority)
-              maxP = q;
+            maxP = p;
+          }
+          else if(maxP->priority > p->priority)
+            maxP = p;
+          else if(maxP->priority == p->priority)
+          {
+            if(p->num_run < maxP->num_run)
+              maxP = p;
           }
 
-          // if(maxP != 0)
-          // {
-          //   if(maxP->priority > p->priority)
-          //     maxP = p;
-          // }
-          // else
-          // {
-          //   maxP = p;
-          // }
-          if(maxP !=0)
-          {  
-            c->proc = maxP;
-            switchuvm(maxP);
-            maxP->state = RUNNING;
-
-            swtch(&(c->scheduler), maxP->context);
-            switchkvm();
-            c->proc = 0;
-          } 
-
         }
-        // if(maxP !=0)
-        // {  
-        //   c->proc = maxP;
-        //   switchuvm(maxP);
-        //   maxP->state = RUNNING;
+        if(maxP !=0)
+        {  
+          c->proc = maxP;
+          maxP->num_run++;
+          switchuvm(maxP);
+          maxP->state = RUNNING;
 
-        //   swtch(&(c->scheduler), maxP->context);
-        //   switchkvm();
-        //   c->proc = 0;
+          swtch(&(c->scheduler), maxP->context);
+          switchkvm();
+          c->proc = 0;
 
-        // }   
+        }   
         release(&ptable.lock);
       #endif    
       #endif    

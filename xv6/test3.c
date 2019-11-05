@@ -5,9 +5,9 @@
 
 int main()
 {
-	for(int i=0;;i++)
+	for(int i=0;i<1000;i++)
 	{
-		printf(3,"1");
+		printf(1,"3");
 	}
 
 	exit();
