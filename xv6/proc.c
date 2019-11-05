@@ -398,7 +398,7 @@ scheduler(void)
   	        c->proc = p;
   	        switchuvm(p);
   	        p->state = RUNNING;
-            cprintf("%d ****** %d\n",c->apicid,p->pid);
+            // cprintf("%d ****** %d\n",c->apicid,p->pid);
   	        swtch(&(c->scheduler), p->context);
   	        switchkvm();
   	        c->proc = 0;
@@ -439,34 +439,53 @@ scheduler(void)
     #else
       #ifdef PRIORITY
         acquire(&ptable.lock);
+        struct proc *q;
         struct proc *maxP = 0;
         for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
         {
           if(p->state != RUNNABLE)
           continue;
+          maxP = p;
+          for(q = ptable.proc; q < &ptable.proc[NPROC]; q++)
+          {
+            if(q->state != RUNNABLE)
+              continue;
+            if(maxP->priority > q->priority)
+              maxP = q;
+          }
 
-          if(maxP != 0)
-          {
-            if(maxP->priority > p->priority)
-              maxP = p;
-          }
-          else
-          {
-            maxP = p;
-          }
+          // if(maxP != 0)
+          // {
+          //   if(maxP->priority > p->priority)
+          //     maxP = p;
+          // }
+          // else
+          // {
+          //   maxP = p;
+          // }
+          if(maxP !=0)
+          {  
+            c->proc = maxP;
+            switchuvm(maxP);
+            maxP->state = RUNNING;
+
+            swtch(&(c->scheduler), maxP->context);
+            switchkvm();
+            c->proc = 0;
+          } 
 
         }
-        if(maxP !=0)
-        {  
-          c->proc = maxP;
-          switchuvm(maxP);
-          maxP->state = RUNNING;
+        // if(maxP !=0)
+        // {  
+        //   c->proc = maxP;
+        //   switchuvm(maxP);
+        //   maxP->state = RUNNING;
 
-          swtch(&(c->scheduler), maxP->context);
-          switchkvm();
-          c->proc = 0;
+        //   swtch(&(c->scheduler), maxP->context);
+        //   switchkvm();
+        //   c->proc = 0;
 
-        }   
+        // }   
         release(&ptable.lock);
       #endif    
       #endif    
@@ -505,26 +524,31 @@ sched(void)
 // Give up the CPU for one scheduling round.
 void
 yield(void)
-{ 
-  // acquire(&ptable.lock);  //DOC: yieldlock
-  // struct proc *mP = 0;
-  // struct proc *P;
-  // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-  // {
-  //   if(p != myproc() && p->state != RUNNABLE)
-  //   continue;
+{
+  #ifdef PRIORITY 
+    acquire(&ptable.lock);  //DOC: yieldlock
+    struct proc *p;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    {
+      if(p->state != RUNNABLE)
+      continue;
 
-  //   if(p->priority <= myproc()->priority)
-  //     myproc()->state = RUNNABLE;
-  //     sched();
+      if(p->priority <= myproc()->priority)
+      { 
+        myproc()->state = RUNNABLE;
+        sched();
+      }  
 
-  // }
-  // release(&ptable.lock);
+    }
+    release(&ptable.lock);
 
-  acquire(&ptable.lock);  //DOC: yieldlock
-  myproc()->state = RUNNABLE;
-  sched();
-  release(&ptable.lock);
+  #else
+    acquire(&ptable.lock);  //DOC: yieldlock
+    myproc()->state = RUNNABLE;
+    sched();
+    release(&ptable.lock);
+  #endif
+
 }
 
 // A fork child's very first scheduling by scheduler()

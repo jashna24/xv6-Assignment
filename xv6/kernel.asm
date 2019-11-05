@@ -7728,12 +7728,12 @@ wakeup1(void *chan)
 80103db9:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
 
 80103dc0 <yield>:
-{ 
+{
 80103dc0:	55                   	push   %ebp
 80103dc1:	89 e5                	mov    %esp,%ebp
 80103dc3:	53                   	push   %ebx
 80103dc4:	83 ec 10             	sub    $0x10,%esp
-  acquire(&ptable.lock);  //DOC: yieldlock
+    acquire(&ptable.lock);  //DOC: yieldlock
 80103dc7:	68 20 2d 11 80       	push   $0x80112d20
 80103dcc:	e8 0f 08 00 00       	call   801045e0 <acquire>
   pushcli();
@@ -7744,11 +7744,11 @@ wakeup1(void *chan)
 80103ddb:	8b 98 ac 00 00 00    	mov    0xac(%eax),%ebx
   popcli();
 80103de1:	e8 6a 07 00 00       	call   80104550 <popcli>
-  myproc()->state = RUNNABLE;
+    myproc()->state = RUNNABLE;
 80103de6:	c7 43 0c 03 00 00 00 	movl   $0x3,0xc(%ebx)
-  sched();
+    sched();
 80103ded:	e8 ce fd ff ff       	call   80103bc0 <sched>
-  release(&ptable.lock);
+    release(&ptable.lock);
 80103df2:	c7 04 24 20 2d 11 80 	movl   $0x80112d20,(%esp)
 80103df9:	e8 a2 08 00 00       	call   801046a0 <release>
 }
