@@ -184,6 +184,12 @@ UPROGS=\
 	_sh\
 	_stressfs\
 	_time\
+	_check_scheduler\
+	_test1\
+	_test2\
+	_test3\
+	_test4\
+	_chngpr\
 	_usertests\
 	_wc\
 	_zombie\
@@ -240,7 +246,7 @@ qemu-nox: fs.img xv6.img
 	$(QEMU) -nographic $(QEMUOPTS)
 
 .gdbinit: .gdbinit.tmpl
-	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
+	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@exit();
 
 qemu-gdb: fs.img xv6.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
@@ -258,7 +264,7 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
-	ln.c ls.c mkdir.c rm.c stressfs.c time.c usertests.c wc.c zombie.c\
+	ln.c ls.c mkdir.c rm.c stressfs.c time.c check_scheduler.c test1.c test2.c test3.c test4.c chngpr.c usertests.c wc.c zombie.c\
 	printf.c umalloc.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\

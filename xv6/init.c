@@ -10,7 +10,6 @@ char *argv[] = { "sh", 0 };
 int
 main(void)
 {
-  printf(1,"dcxz");
   int pid, wpid;
 
   if(open("console", O_RDWR) < 0){
@@ -25,14 +24,14 @@ main(void)
   #else
   #ifdef FCFS
     printf(1, "Scheduler policy: FCFS\n");
-  // #else
-  // #ifdef PRIORITY
-  //   printf(1, "Scheduler policy: PRIORITY\n");
+  #else
+  #ifdef PRIORITY
+    printf(1, "Scheduler policy: PRIORITY\n");
   // #else
   // #ifdef SML
   //   printf(1, "Scheduler policy: SML\n");
   // #endif
-  // #endif
+  #endif
   #endif
   #endif
 

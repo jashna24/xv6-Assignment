@@ -59,11 +59,11 @@ main(void)
 {
   56:	83 ec 10             	sub    $0x10,%esp
   write(fd, s, strlen(s));
-  59:	68 4c 04 00 00       	push   $0x44c
+  59:	68 54 04 00 00       	push   $0x454
   5e:	e8 6d 01 00 00       	call   1d0 <strlen>
   63:	83 c4 0c             	add    $0xc,%esp
   66:	50                   	push   %eax
-  67:	68 4c 04 00 00       	push   $0x44c
+  67:	68 54 04 00 00       	push   $0x454
   6c:	6a 01                	push   $0x1
   6e:	e8 57 03 00 00       	call   3ca <write>
   73:	83 c4 10             	add    $0x10,%esp
@@ -98,11 +98,11 @@ main(void)
   b6:	75 71                	jne    129 <forktest+0xd9>
   write(fd, s, strlen(s));
   b8:	83 ec 0c             	sub    $0xc,%esp
-  bb:	68 7e 04 00 00       	push   $0x47e
+  bb:	68 86 04 00 00       	push   $0x486
   c0:	e8 0b 01 00 00       	call   1d0 <strlen>
   c5:	83 c4 0c             	add    $0xc,%esp
   c8:	50                   	push   %eax
-  c9:	68 7e 04 00 00       	push   $0x47e
+  c9:	68 86 04 00 00       	push   $0x486
   ce:	6a 01                	push   $0x1
   d0:	e8 f5 02 00 00       	call   3ca <write>
 }
@@ -112,11 +112,11 @@ main(void)
   da:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi
   write(fd, s, strlen(s));
   e0:	83 ec 0c             	sub    $0xc,%esp
-  e3:	68 8c 04 00 00       	push   $0x48c
+  e3:	68 94 04 00 00       	push   $0x494
   e8:	e8 e3 00 00 00       	call   1d0 <strlen>
   ed:	83 c4 0c             	add    $0xc,%esp
   f0:	50                   	push   %eax
-  f1:	68 8c 04 00 00       	push   $0x48c
+  f1:	68 94 04 00 00       	push   $0x494
   f6:	6a 01                	push   $0x1
   f8:	e8 cd 02 00 00       	call   3ca <write>
     exit();
@@ -125,22 +125,22 @@ main(void)
  102:	e8 9b 02 00 00       	call   3a2 <exit>
   write(fd, s, strlen(s));
  107:	83 ec 0c             	sub    $0xc,%esp
- 10a:	68 57 04 00 00       	push   $0x457
+ 10a:	68 5f 04 00 00       	push   $0x45f
  10f:	e8 bc 00 00 00       	call   1d0 <strlen>
  114:	83 c4 0c             	add    $0xc,%esp
  117:	50                   	push   %eax
- 118:	68 57 04 00 00       	push   $0x457
+ 118:	68 5f 04 00 00       	push   $0x45f
  11d:	6a 01                	push   $0x1
  11f:	e8 a6 02 00 00       	call   3ca <write>
       exit();
  124:	e8 79 02 00 00       	call   3a2 <exit>
   write(fd, s, strlen(s));
  129:	83 ec 0c             	sub    $0xc,%esp
- 12c:	68 6b 04 00 00       	push   $0x46b
+ 12c:	68 73 04 00 00       	push   $0x473
  131:	e8 9a 00 00 00       	call   1d0 <strlen>
  136:	83 c4 0c             	add    $0xc,%esp
  139:	50                   	push   %eax
- 13a:	68 6b 04 00 00       	push   $0x46b
+ 13a:	68 73 04 00 00       	push   $0x473
  13f:	6a 01                	push   $0x1
  141:	e8 84 02 00 00       	call   3ca <write>
     exit();
@@ -662,14 +662,20 @@ SYSCALL(sbrk)
  437:	cd 40                	int    $0x40
  439:	c3                   	ret    
 
-0000043a <sleep>:
-SYSCALL(sleep)
- 43a:	b8 0d 00 00 00       	mov    $0xd,%eax
+0000043a <set_priority>:
+SYSCALL(set_priority)
+ 43a:	b8 17 00 00 00       	mov    $0x17,%eax
  43f:	cd 40                	int    $0x40
  441:	c3                   	ret    
 
-00000442 <uptime>:
-SYSCALL(uptime)
- 442:	b8 0e 00 00 00       	mov    $0xe,%eax
+00000442 <sleep>:
+SYSCALL(sleep)
+ 442:	b8 0d 00 00 00       	mov    $0xd,%eax
  447:	cd 40                	int    $0x40
  449:	c3                   	ret    
+
+0000044a <uptime>:
+SYSCALL(uptime)
+ 44a:	b8 0e 00 00 00       	mov    $0xe,%eax
+ 44f:	cd 40                	int    $0x40
+ 451:	c3                   	ret    

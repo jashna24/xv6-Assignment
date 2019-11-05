@@ -89,6 +89,15 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
 
+  // #ifdef PRIORITY
+    p->priority = 60;
+  // #endif
+
+  p->stime = ticks;
+  p->etime  = 0;
+  p->rtime  = 0;
+  p->iotime = 0;
+
   release(&ptable.lock);
 
   // Allocate kernel stack.
@@ -112,10 +121,6 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
-  p->stime = ticks;
-  p->etime  = 0;
-  p->rtime  = 0;
-  p->iotime = 0;
 
   return p;
 }
@@ -291,7 +296,7 @@ int waitx(int *wtime, int *rtime)
       if(p->state == ZOMBIE){
         // Found one.
 
-        *wtime = p->etime - p->stime - p->rtime - p->iotime;
+        *wtime = p->etime - p->stime - p->rtime;
         *rtime = p->rtime;
         
         pid = p->pid;
@@ -384,31 +389,24 @@ scheduler(void)
     sti();
 
     // Loop over process table looking for process to run.
-    acquire(&ptable.lock);
     #ifdef DEFAULT
+      acquire(&ptable.lock);
       for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
       {
-        // min_ctime = min_ctime; 
-      	// {
   	        if(p->state != RUNNABLE)
   	          continue;
   	        c->proc = p;
   	        switchuvm(p);
   	        p->state = RUNNING;
-
+            cprintf("%d ****** %d\n",c->apicid,p->pid);
   	        swtch(&(c->scheduler), p->context);
   	        switchkvm();
   	        c->proc = 0;
-  	    // }    
-
-
-        // Switch to chosen process.  It is the process's job
-        // to release ptable.lock and then reacquire it
-        // before jumping back to us.
       }
-
+      release(&ptable.lock);
     #else
       #ifdef FCFS
+        acquire(&ptable.lock);
         struct proc *min_ctime = 0;
         for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
         {
@@ -428,22 +426,52 @@ scheduler(void)
 
         if(min_ctime !=0)
         {  
-          p = min_ctime;
-          c->proc = p;
-          switchuvm(p);
-          p->state = RUNNING;
+          cprintf("%d ****** %d\n",c->apicid,min_ctime->pid);
+          c->proc = min_ctime;
+          switchuvm(min_ctime);
+          min_ctime->state = RUNNING;
 
-          swtch(&(c->scheduler), c->proc->context);
+          swtch(&(c->scheduler), min_ctime->context);
           switchkvm();
+          c->proc = 0;
         } 
+        release(&ptable.lock);
+    #else
+      #ifdef PRIORITY
+        acquire(&ptable.lock);
+        struct proc *maxP = 0;
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+        {
+          if(p->state != RUNNABLE)
+          continue;
 
-        // c->proc = 0;
+          if(maxP != 0)
+          {
+            if(maxP->priority > p->priority)
+              maxP = p;
+          }
+          else
+          {
+            maxP = p;
+          }
 
+        }
+        if(maxP !=0)
+        {  
+          c->proc = maxP;
+          switchuvm(maxP);
+          maxP->state = RUNNING;
 
-        #endif    
-        #endif    
+          swtch(&(c->scheduler), maxP->context);
+          switchkvm();
+          c->proc = 0;
 
-    release(&ptable.lock);
+        }   
+        release(&ptable.lock);
+      #endif    
+      #endif    
+      #endif    
+
 
   }
 }
@@ -477,7 +505,22 @@ sched(void)
 // Give up the CPU for one scheduling round.
 void
 yield(void)
-{
+{ 
+  // acquire(&ptable.lock);  //DOC: yieldlock
+  // struct proc *mP = 0;
+  // struct proc *P;
+  // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  // {
+  //   if(p != myproc() && p->state != RUNNABLE)
+  //   continue;
+
+  //   if(p->priority <= myproc()->priority)
+  //     myproc()->state = RUNNABLE;
+  //     sched();
+
+  // }
+  // release(&ptable.lock);
+
   acquire(&ptable.lock);  //DOC: yieldlock
   myproc()->state = RUNNABLE;
   sched();
@@ -631,7 +674,6 @@ procdump(void)
 void update_time()
 {
   struct proc *p;
-  // char *state;
   acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
   {
@@ -642,12 +684,30 @@ void update_time()
           p->iotime++;
         else if(p->state == RUNNING)
         {
-          // cprintf("jashnnnnnnnnnnnnn\n");
-          // cprintf("%d\n",p->pid);
           p->rtime++;
         }
       }  
   }
   release(&ptable.lock);
 
+}
+
+int set_priority(int pid, int priority)
+{
+  struct proc *p;
+  int old_priority= -1;
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if(p->pid == pid) 
+    {
+      old_priority = p->priority;
+      p->priority = priority;
+      break;
+    }
+  }
+  release(&ptable.lock);
+
+  return old_priority;
 }
