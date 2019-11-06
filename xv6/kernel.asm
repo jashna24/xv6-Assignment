@@ -7429,89 +7429,90 @@ myproc(void) {
 80103ae3:	57                   	push   %edi
 80103ae4:	56                   	push   %esi
 80103ae5:	53                   	push   %ebx
-80103ae6:	83 ec 0c             	sub    $0xc,%esp
+80103ae6:	83 ec 1c             	sub    $0x1c,%esp
   struct cpu *c = mycpu();
 80103ae9:	e8 92 fc ff ff       	call   80103780 <mycpu>
-80103aee:	8d 70 04             	lea    0x4(%eax),%esi
-80103af1:	89 c3                	mov    %eax,%ebx
   c->proc = 0;
-80103af3:	c7 80 ac 00 00 00 00 	movl   $0x0,0xac(%eax)
-80103afa:	00 00 00 
-80103afd:	8d 76 00             	lea    0x0(%esi),%esi
+80103aee:	c7 80 ac 00 00 00 00 	movl   $0x0,0xac(%eax)
+80103af5:	00 00 00 
+  struct cpu *c = mycpu();
+80103af8:	89 c3                	mov    %eax,%ebx
+80103afa:	8d 40 04             	lea    0x4(%eax),%eax
+80103afd:	89 45 e4             	mov    %eax,-0x1c(%ebp)
   asm volatile("sti");
 80103b00:	fb                   	sti    
         acquire(&ptable.lock);
 80103b01:	83 ec 0c             	sub    $0xc,%esp
-        struct proc *maxP = 0;
-80103b04:	31 ff                	xor    %edi,%edi
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+80103b04:	be 54 2d 11 80       	mov    $0x80112d54,%esi
         acquire(&ptable.lock);
-80103b06:	68 20 2d 11 80       	push   $0x80112d20
-80103b0b:	e8 20 0b 00 00       	call   80104630 <acquire>
-80103b10:	83 c4 10             	add    $0x10,%esp
+80103b09:	68 20 2d 11 80       	push   $0x80112d20
+80103b0e:	e8 1d 0b 00 00       	call   80104630 <acquire>
+80103b13:	83 c4 10             	add    $0x10,%esp
+80103b16:	eb 16                	jmp    80103b2e <scheduler+0x4e>
+80103b18:	90                   	nop
+80103b19:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
         for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-80103b13:	b8 54 2d 11 80       	mov    $0x80112d54,%eax
-80103b18:	eb 2a                	jmp    80103b44 <scheduler+0x64>
-80103b1a:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi
-          else if(maxP->priority == p->priority)
-80103b20:	75 16                	jne    80103b38 <scheduler+0x58>
-            if(p->num_run < maxP->num_run)
-80103b22:	8b 8f 80 00 00 00    	mov    0x80(%edi),%ecx
-80103b28:	39 88 80 00 00 00    	cmp    %ecx,0x80(%eax)
-80103b2e:	0f 4c f8             	cmovl  %eax,%edi
-80103b31:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
-        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-80103b38:	05 94 00 00 00       	add    $0x94,%eax
-80103b3d:	3d 54 52 11 80       	cmp    $0x80115254,%eax
-80103b42:	73 20                	jae    80103b64 <scheduler+0x84>
+80103b20:	81 c6 94 00 00 00    	add    $0x94,%esi
+80103b26:	81 fe 54 52 11 80    	cmp    $0x80115254,%esi
+80103b2c:	73 77                	jae    80103ba5 <scheduler+0xc5>
           if(p->state != RUNNABLE)
-80103b44:	83 78 0c 03          	cmpl   $0x3,0xc(%eax)
-80103b48:	75 ee                	jne    80103b38 <scheduler+0x58>
-          if(maxP == 0)
-80103b4a:	85 ff                	test   %edi,%edi
-80103b4c:	74 08                	je     80103b56 <scheduler+0x76>
-          else if(maxP->priority > p->priority)
-80103b4e:	8b 50 68             	mov    0x68(%eax),%edx
-80103b51:	39 57 68             	cmp    %edx,0x68(%edi)
-80103b54:	7e ca                	jle    80103b20 <scheduler+0x40>
-80103b56:	89 c7                	mov    %eax,%edi
+80103b2e:	83 7e 0c 03          	cmpl   $0x3,0xc(%esi)
+80103b32:	75 ec                	jne    80103b20 <scheduler+0x40>
+80103b34:	89 f7                	mov    %esi,%edi
+          for(q = ptable.proc; q < &ptable.proc[NPROC]; q++)
+80103b36:	b8 54 2d 11 80       	mov    $0x80112d54,%eax
+80103b3b:	90                   	nop
+80103b3c:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi
+          	if(q->state != RUNNABLE)
+80103b40:	83 78 0c 03          	cmpl   $0x3,0xc(%eax)
+80103b44:	75 09                	jne    80103b4f <scheduler+0x6f>
+          	if(maxP->priority > q->priority)
+80103b46:	8b 50 68             	mov    0x68(%eax),%edx
+80103b49:	39 57 68             	cmp    %edx,0x68(%edi)
+80103b4c:	0f 4f f8             	cmovg  %eax,%edi
+          for(q = ptable.proc; q < &ptable.proc[NPROC]; q++)
+80103b4f:	05 94 00 00 00       	add    $0x94,%eax
+80103b54:	3d 54 52 11 80       	cmp    $0x80115254,%eax
+80103b59:	72 e5                	jb     80103b40 <scheduler+0x60>
+	          c->proc = maxP;
+80103b5b:	89 bb ac 00 00 00    	mov    %edi,0xac(%ebx)
+	          maxP->num_run++;
+80103b61:	83 87 80 00 00 00 01 	addl   $0x1,0x80(%edi)
+	          switchuvm(maxP);
+80103b68:	83 ec 0c             	sub    $0xc,%esp
+80103b6b:	57                   	push   %edi
         for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-80103b58:	05 94 00 00 00       	add    $0x94,%eax
-80103b5d:	3d 54 52 11 80       	cmp    $0x80115254,%eax
-80103b62:	72 e0                	jb     80103b44 <scheduler+0x64>
-        if(maxP !=0)
-80103b64:	85 ff                	test   %edi,%edi
-80103b66:	74 3a                	je     80103ba2 <scheduler+0xc2>
-          c->proc = maxP;
-80103b68:	89 bb ac 00 00 00    	mov    %edi,0xac(%ebx)
-          maxP->num_run++;
-80103b6e:	83 87 80 00 00 00 01 	addl   $0x1,0x80(%edi)
-          switchuvm(maxP);
-80103b75:	83 ec 0c             	sub    $0xc,%esp
-80103b78:	57                   	push   %edi
-80103b79:	e8 02 30 00 00       	call   80106b80 <switchuvm>
-          maxP->state = RUNNING;
-80103b7e:	c7 47 0c 04 00 00 00 	movl   $0x4,0xc(%edi)
-          swtch(&(c->scheduler), maxP->context);
-80103b85:	58                   	pop    %eax
-80103b86:	5a                   	pop    %edx
-80103b87:	ff 77 1c             	pushl  0x1c(%edi)
-80103b8a:	56                   	push   %esi
-80103b8b:	e8 eb 0d 00 00       	call   8010497b <swtch>
-          switchkvm();
-80103b90:	e8 cb 2f 00 00       	call   80106b60 <switchkvm>
-          c->proc = 0;
-80103b95:	c7 83 ac 00 00 00 00 	movl   $0x0,0xac(%ebx)
-80103b9c:	00 00 00 
-80103b9f:	83 c4 10             	add    $0x10,%esp
+80103b6c:	81 c6 94 00 00 00    	add    $0x94,%esi
+	          switchuvm(maxP);
+80103b72:	e8 09 30 00 00       	call   80106b80 <switchuvm>
+	          maxP->state = RUNNING;
+80103b77:	c7 47 0c 04 00 00 00 	movl   $0x4,0xc(%edi)
+	          swtch(&(c->scheduler), maxP->context);
+80103b7e:	58                   	pop    %eax
+80103b7f:	5a                   	pop    %edx
+80103b80:	ff 77 1c             	pushl  0x1c(%edi)
+80103b83:	ff 75 e4             	pushl  -0x1c(%ebp)
+80103b86:	e8 f0 0d 00 00       	call   8010497b <swtch>
+	          switchkvm();
+80103b8b:	e8 d0 2f 00 00       	call   80106b60 <switchkvm>
+	          c->proc = 0;
+80103b90:	83 c4 10             	add    $0x10,%esp
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+80103b93:	81 fe 54 52 11 80    	cmp    $0x80115254,%esi
+	          c->proc = 0;
+80103b99:	c7 83 ac 00 00 00 00 	movl   $0x0,0xac(%ebx)
+80103ba0:	00 00 00 
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+80103ba3:	72 89                	jb     80103b2e <scheduler+0x4e>
         release(&ptable.lock);
-80103ba2:	83 ec 0c             	sub    $0xc,%esp
-80103ba5:	68 20 2d 11 80       	push   $0x80112d20
-80103baa:	e8 41 0b 00 00       	call   801046f0 <release>
+80103ba5:	83 ec 0c             	sub    $0xc,%esp
+80103ba8:	68 20 2d 11 80       	push   $0x80112d20
+80103bad:	e8 3e 0b 00 00       	call   801046f0 <release>
   {
-80103baf:	83 c4 10             	add    $0x10,%esp
-80103bb2:	e9 49 ff ff ff       	jmp    80103b00 <scheduler+0x20>
-80103bb7:	89 f6                	mov    %esi,%esi
-80103bb9:	8d bc 27 00 00 00 00 	lea    0x0(%edi,%eiz,1),%edi
+80103bb2:	83 c4 10             	add    $0x10,%esp
+80103bb5:	e9 46 ff ff ff       	jmp    80103b00 <scheduler+0x20>
+80103bba:	8d b6 00 00 00 00    	lea    0x0(%esi),%esi
 
 80103bc0 <sched>:
 {
