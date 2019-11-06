@@ -1,11 +1,12 @@
 struct stat;
 struct rtcdate;
-
+struct proc_stat;
 // system calls
 int fork(void);
 int exit(void) __attribute__((noreturn));
 int wait(void);
 int waitx(int *wtime, int *rtime);
+int getpinfo(struct proc_stat* , int);
 int pipe(int*);
 int write(int, const void*, int);
 int read(int, void*, int);

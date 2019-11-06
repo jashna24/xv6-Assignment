@@ -13,6 +13,7 @@ SYSCALL(exit)
 SYSCALL(wait)
 
 SYSCALL(waitx)
+SYSCALL(getpinfo)
 SYSCALL(pipe)
 SYSCALL(read)
 SYSCALL(write)

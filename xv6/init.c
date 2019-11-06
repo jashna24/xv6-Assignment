@@ -27,10 +27,10 @@ main(void)
   #else
   #ifdef PRIORITY
     printf(1, "Scheduler policy: PRIORITY\n");
-  // #else
-  // #ifdef SML
-  //   printf(1, "Scheduler policy: SML\n");
-  // #endif
+  #else
+  #ifdef MLFQ
+    printf(1, "Scheduler policy: MLFQ\n");
+  #endif
   #endif
   #endif
   #endif

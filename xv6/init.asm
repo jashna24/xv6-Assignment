@@ -24,7 +24,7 @@ main(void)
    f:	83 ec 08             	sub    $0x8,%esp
   12:	6a 02                	push   $0x2
   14:	68 f8 07 00 00       	push   $0x7f8
-  19:	e8 6c 03 00 00       	call   38a <open>
+  19:	e8 74 03 00 00       	call   392 <open>
   1e:	83 c4 10             	add    $0x10,%esp
   21:	85 c0                	test   %eax,%eax
   23:	0f 88 9f 00 00 00    	js     c8 <main+0xc8>
@@ -34,10 +34,10 @@ main(void)
   dup(0);  // stdout
   29:	83 ec 0c             	sub    $0xc,%esp
   2c:	6a 00                	push   $0x0
-  2e:	e8 8f 03 00 00       	call   3c2 <dup>
+  2e:	e8 97 03 00 00       	call   3ca <dup>
   dup(0);  // stderr
   33:	c7 04 24 00 00 00 00 	movl   $0x0,(%esp)
-  3a:	e8 83 03 00 00       	call   3c2 <dup>
+  3a:	e8 8b 03 00 00       	call   3ca <dup>
   #else
   #ifdef FCFS
     printf(1, "Scheduler policy: FCFS\n");
@@ -105,7 +105,7 @@ main(void)
   a5:	50                   	push   %eax
   a6:	68 14 0b 00 00       	push   $0xb14
   ab:	68 42 08 00 00       	push   $0x842
-  b0:	e8 cd 02 00 00       	call   382 <exec>
+  b0:	e8 d5 02 00 00       	call   38a <exec>
       printf(1, "init: exec sh failed\n");
   b5:	5a                   	pop    %edx
   b6:	59                   	pop    %ecx
@@ -119,13 +119,13 @@ main(void)
   c9:	6a 01                	push   $0x1
   cb:	6a 01                	push   $0x1
   cd:	68 f8 07 00 00       	push   $0x7f8
-  d2:	e8 bb 02 00 00       	call   392 <mknod>
+  d2:	e8 c3 02 00 00       	call   39a <mknod>
     open("console", O_RDWR);
   d7:	5b                   	pop    %ebx
   d8:	58                   	pop    %eax
   d9:	6a 02                	push   $0x2
   db:	68 f8 07 00 00       	push   $0x7f8
-  e0:	e8 a5 02 00 00       	call   38a <open>
+  e0:	e8 ad 02 00 00       	call   392 <open>
   e5:	83 c4 10             	add    $0x10,%esp
   e8:	e9 3c ff ff ff       	jmp    29 <main+0x29>
   ed:	66 90                	xchg   %ax,%ax
@@ -339,7 +339,7 @@ gets(char *buf, int max)
  21e:	6a 01                	push   $0x1
  220:	50                   	push   %eax
  221:	6a 00                	push   $0x0
- 223:	e8 3a 01 00 00       	call   362 <read>
+ 223:	e8 42 01 00 00       	call   36a <read>
     if(cc < 1)
  228:	83 c4 10             	add    $0x10,%esp
  22b:	85 c0                	test   %eax,%eax
@@ -409,7 +409,7 @@ stat(const char *n, struct stat *st)
  285:	83 ec 08             	sub    $0x8,%esp
  288:	6a 00                	push   $0x0
  28a:	ff 75 08             	pushl  0x8(%ebp)
- 28d:	e8 f8 00 00 00       	call   38a <open>
+ 28d:	e8 00 01 00 00       	call   392 <open>
   if(fd < 0)
  292:	83 c4 10             	add    $0x10,%esp
  295:	85 c0                	test   %eax,%eax
@@ -420,13 +420,13 @@ stat(const char *n, struct stat *st)
  29c:	ff 75 0c             	pushl  0xc(%ebp)
  29f:	89 c3                	mov    %eax,%ebx
  2a1:	50                   	push   %eax
- 2a2:	e8 fb 00 00 00       	call   3a2 <fstat>
+ 2a2:	e8 03 01 00 00       	call   3aa <fstat>
   close(fd);
  2a7:	89 1c 24             	mov    %ebx,(%esp)
   r = fstat(fd, st);
  2aa:	89 c6                	mov    %eax,%esi
   close(fd);
- 2ac:	e8 c1 00 00 00       	call   372 <close>
+ 2ac:	e8 c9 00 00 00       	call   37a <close>
   return r;
  2b1:	83 c4 10             	add    $0x10,%esp
 }
@@ -548,123 +548,125 @@ SYSCALL(waitx)
  357:	cd 40                	int    $0x40
  359:	c3                   	ret    
 
-0000035a <pipe>:
-SYSCALL(pipe)
- 35a:	b8 04 00 00 00       	mov    $0x4,%eax
+0000035a <getpinfo>:
+SYSCALL(getpinfo)
+ 35a:	b8 18 00 00 00       	mov    $0x18,%eax
  35f:	cd 40                	int    $0x40
  361:	c3                   	ret    
 
-00000362 <read>:
-SYSCALL(read)
- 362:	b8 05 00 00 00       	mov    $0x5,%eax
+00000362 <pipe>:
+SYSCALL(pipe)
+ 362:	b8 04 00 00 00       	mov    $0x4,%eax
  367:	cd 40                	int    $0x40
  369:	c3                   	ret    
 
-0000036a <write>:
-SYSCALL(write)
- 36a:	b8 10 00 00 00       	mov    $0x10,%eax
+0000036a <read>:
+SYSCALL(read)
+ 36a:	b8 05 00 00 00       	mov    $0x5,%eax
  36f:	cd 40                	int    $0x40
  371:	c3                   	ret    
 
-00000372 <close>:
-SYSCALL(close)
- 372:	b8 15 00 00 00       	mov    $0x15,%eax
+00000372 <write>:
+SYSCALL(write)
+ 372:	b8 10 00 00 00       	mov    $0x10,%eax
  377:	cd 40                	int    $0x40
  379:	c3                   	ret    
 
-0000037a <kill>:
-SYSCALL(kill)
- 37a:	b8 06 00 00 00       	mov    $0x6,%eax
+0000037a <close>:
+SYSCALL(close)
+ 37a:	b8 15 00 00 00       	mov    $0x15,%eax
  37f:	cd 40                	int    $0x40
  381:	c3                   	ret    
 
-00000382 <exec>:
-SYSCALL(exec)
- 382:	b8 07 00 00 00       	mov    $0x7,%eax
+00000382 <kill>:
+SYSCALL(kill)
+ 382:	b8 06 00 00 00       	mov    $0x6,%eax
  387:	cd 40                	int    $0x40
  389:	c3                   	ret    
 
-0000038a <open>:
-SYSCALL(open)
- 38a:	b8 0f 00 00 00       	mov    $0xf,%eax
+0000038a <exec>:
+SYSCALL(exec)
+ 38a:	b8 07 00 00 00       	mov    $0x7,%eax
  38f:	cd 40                	int    $0x40
  391:	c3                   	ret    
 
-00000392 <mknod>:
-SYSCALL(mknod)
- 392:	b8 11 00 00 00       	mov    $0x11,%eax
+00000392 <open>:
+SYSCALL(open)
+ 392:	b8 0f 00 00 00       	mov    $0xf,%eax
  397:	cd 40                	int    $0x40
  399:	c3                   	ret    
 
-0000039a <unlink>:
-SYSCALL(unlink)
- 39a:	b8 12 00 00 00       	mov    $0x12,%eax
+0000039a <mknod>:
+SYSCALL(mknod)
+ 39a:	b8 11 00 00 00       	mov    $0x11,%eax
  39f:	cd 40                	int    $0x40
  3a1:	c3                   	ret    
 
-000003a2 <fstat>:
-SYSCALL(fstat)
- 3a2:	b8 08 00 00 00       	mov    $0x8,%eax
+000003a2 <unlink>:
+SYSCALL(unlink)
+ 3a2:	b8 12 00 00 00       	mov    $0x12,%eax
  3a7:	cd 40                	int    $0x40
  3a9:	c3                   	ret    
 
-000003aa <link>:
-SYSCALL(link)
- 3aa:	b8 13 00 00 00       	mov    $0x13,%eax
+000003aa <fstat>:
+SYSCALL(fstat)
+ 3aa:	b8 08 00 00 00       	mov    $0x8,%eax
  3af:	cd 40                	int    $0x40
  3b1:	c3                   	ret    
 
-000003b2 <mkdir>:
-SYSCALL(mkdir)
- 3b2:	b8 14 00 00 00       	mov    $0x14,%eax
+000003b2 <link>:
+SYSCALL(link)
+ 3b2:	b8 13 00 00 00       	mov    $0x13,%eax
  3b7:	cd 40                	int    $0x40
  3b9:	c3                   	ret    
 
-000003ba <chdir>:
-SYSCALL(chdir)
- 3ba:	b8 09 00 00 00       	mov    $0x9,%eax
+000003ba <mkdir>:
+SYSCALL(mkdir)
+ 3ba:	b8 14 00 00 00       	mov    $0x14,%eax
  3bf:	cd 40                	int    $0x40
  3c1:	c3                   	ret    
 
-000003c2 <dup>:
-SYSCALL(dup)
- 3c2:	b8 0a 00 00 00       	mov    $0xa,%eax
+000003c2 <chdir>:
+SYSCALL(chdir)
+ 3c2:	b8 09 00 00 00       	mov    $0x9,%eax
  3c7:	cd 40                	int    $0x40
  3c9:	c3                   	ret    
 
-000003ca <getpid>:
-SYSCALL(getpid)
- 3ca:	b8 0b 00 00 00       	mov    $0xb,%eax
+000003ca <dup>:
+SYSCALL(dup)
+ 3ca:	b8 0a 00 00 00       	mov    $0xa,%eax
  3cf:	cd 40                	int    $0x40
  3d1:	c3                   	ret    
 
-000003d2 <sbrk>:
-SYSCALL(sbrk)
- 3d2:	b8 0c 00 00 00       	mov    $0xc,%eax
+000003d2 <getpid>:
+SYSCALL(getpid)
+ 3d2:	b8 0b 00 00 00       	mov    $0xb,%eax
  3d7:	cd 40                	int    $0x40
  3d9:	c3                   	ret    
 
-000003da <set_priority>:
-SYSCALL(set_priority)
- 3da:	b8 17 00 00 00       	mov    $0x17,%eax
+000003da <sbrk>:
+SYSCALL(sbrk)
+ 3da:	b8 0c 00 00 00       	mov    $0xc,%eax
  3df:	cd 40                	int    $0x40
  3e1:	c3                   	ret    
 
-000003e2 <sleep>:
-SYSCALL(sleep)
- 3e2:	b8 0d 00 00 00       	mov    $0xd,%eax
+000003e2 <set_priority>:
+SYSCALL(set_priority)
+ 3e2:	b8 17 00 00 00       	mov    $0x17,%eax
  3e7:	cd 40                	int    $0x40
  3e9:	c3                   	ret    
 
-000003ea <uptime>:
-SYSCALL(uptime)
- 3ea:	b8 0e 00 00 00       	mov    $0xe,%eax
+000003ea <sleep>:
+SYSCALL(sleep)
+ 3ea:	b8 0d 00 00 00       	mov    $0xd,%eax
  3ef:	cd 40                	int    $0x40
  3f1:	c3                   	ret    
- 3f2:	66 90                	xchg   %ax,%ax
- 3f4:	66 90                	xchg   %ax,%ax
- 3f6:	66 90                	xchg   %ax,%ax
- 3f8:	66 90                	xchg   %ax,%ax
+
+000003f2 <uptime>:
+SYSCALL(uptime)
+ 3f2:	b8 0e 00 00 00       	mov    $0xe,%eax
+ 3f7:	cd 40                	int    $0x40
+ 3f9:	c3                   	ret    
  3fa:	66 90                	xchg   %ax,%ax
  3fc:	66 90                	xchg   %ax,%ax
  3fe:	66 90                	xchg   %ax,%ax
@@ -743,7 +745,7 @@ printint(int fd, int xx, int base, int sgn)
  46b:	53                   	push   %ebx
  46c:	57                   	push   %edi
  46d:	88 45 d7             	mov    %al,-0x29(%ebp)
- 470:	e8 f5 fe ff ff       	call   36a <write>
+ 470:	e8 fd fe ff ff       	call   372 <write>
 
   while(--i >= 0)
  475:	83 c4 10             	add    $0x10,%esp
@@ -819,7 +821,7 @@ printf(int fd, const char *fmt, ...)
  4da:	6a 01                	push   $0x1
  4dc:	50                   	push   %eax
  4dd:	ff 75 08             	pushl  0x8(%ebp)
- 4e0:	e8 85 fe ff ff       	call   36a <write>
+ 4e0:	e8 8d fe ff ff       	call   372 <write>
  4e5:	83 c4 10             	add    $0x10,%esp
  4e8:	83 c6 01             	add    $0x1,%esi
   for(i = 0; fmt[i]; i++){
@@ -874,7 +876,7 @@ printf(int fd, const char *fmt, ...)
  53b:	6a 01                	push   $0x1
  53d:	50                   	push   %eax
  53e:	ff 75 08             	pushl  0x8(%ebp)
- 541:	e8 24 fe ff ff       	call   36a <write>
+ 541:	e8 2c fe ff ff       	call   372 <write>
  546:	83 c4 0c             	add    $0xc,%esp
  549:	8d 45 e6             	lea    -0x1a(%ebp),%eax
  54c:	88 5d e6             	mov    %bl,-0x1a(%ebp)
@@ -890,7 +892,7 @@ printf(int fd, const char *fmt, ...)
       state = 0;
  558:	31 ff                	xor    %edi,%edi
   write(fd, &c, 1);
- 55a:	e8 0b fe ff ff       	call   36a <write>
+ 55a:	e8 13 fe ff ff       	call   372 <write>
   for(i = 0; fmt[i]; i++){
  55f:	0f b6 5e ff          	movzbl -0x1(%esi),%ebx
   write(fd, &c, 1);
@@ -962,7 +964,7 @@ printf(int fd, const char *fmt, ...)
  5f1:	6a 01                	push   $0x1
  5f3:	57                   	push   %edi
  5f4:	53                   	push   %ebx
- 5f5:	e8 70 fd ff ff       	call   36a <write>
+ 5f5:	e8 78 fd ff ff       	call   372 <write>
         while(*s != 0){
  5fa:	0f b6 06             	movzbl (%esi),%eax
  5fd:	83 c4 10             	add    $0x10,%esp
@@ -1001,7 +1003,7 @@ printf(int fd, const char *fmt, ...)
  640:	8d 45 e4             	lea    -0x1c(%ebp),%eax
  643:	50                   	push   %eax
  644:	ff 75 08             	pushl  0x8(%ebp)
- 647:	e8 1e fd ff ff       	call   36a <write>
+ 647:	e8 26 fd ff ff       	call   372 <write>
         ap++;
  64c:	89 7d d4             	mov    %edi,-0x2c(%ebp)
  64f:	83 c4 10             	add    $0x10,%esp
@@ -1179,7 +1181,7 @@ malloc(uint nbytes)
   p = sbrk(nu * sizeof(Header));
  75b:	83 ec 0c             	sub    $0xc,%esp
  75e:	56                   	push   %esi
- 75f:	e8 6e fc ff ff       	call   3d2 <sbrk>
+ 75f:	e8 76 fc ff ff       	call   3da <sbrk>
   if(p == (char*)-1)
  764:	83 c4 10             	add    $0x10,%esp
  767:	83 f8 ff             	cmp    $0xffffffff,%eax

@@ -1,3 +1,4 @@
+
 #include "types.h"
 #include "defs.h"
 #include "param.h"
@@ -55,6 +56,11 @@ trap(struct trapframe *tf)
       release(&tickslock);
 
       update_time();
+
+      #ifdef MLFQ
+        if((ticks % MLFQT) == 0)
+          aging();
+      #endif  
 
       // if(myproc())
       // {
@@ -115,12 +121,15 @@ trap(struct trapframe *tf)
   // Force process to give up CPU on clock tick.
   // If interrupts were on while locks held, would need to check nlock.
   #ifndef FCFS
-  if(myproc() && myproc()->state == RUNNING &&
-     tf->trapno == T_IRQ0+IRQ_TIMER)
-    yield();
-
-  // Check if the process has been killed since we yielded
-  if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
-    exit();
+    #ifndef MLFQ
+      if(myproc() && myproc()->state == RUNNING && tf->trapno == T_IRQ0+IRQ_TIMER)
+        yield();
+    #else
+      if(myproc() && myproc()->state == RUNNING)
+        yield();
+    #endif
+      // Check if the process has been killed since we yielded
+      if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)
+        exit();
   #endif
 }

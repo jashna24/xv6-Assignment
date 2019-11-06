@@ -1,4 +1,6 @@
 // Per-CPU state
+#include "pinfo.h"
+
 struct cpu {
   uchar apicid;                // Local APIC ID
   struct context *scheduler;   // swtch() here to enter scheduler
@@ -51,11 +53,16 @@ struct proc {
   int priority;
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
-  int num_run;
   int stime;
   int etime; 
   int rtime;
   int iotime;
+  int prtime;
+  int pwtime;
+  int qu;
+  #ifdef MLFQ
+  struct proc_stat pinfo;
+  #endif  
 };
 
 // Process memory is laid out contiguously, low addresses first:
@@ -63,3 +70,17 @@ struct proc {
 //   original data and bss
 //   fixed-size stack
 //   expandable heap
+
+
+#ifdef MLFQ
+  #define MLFQT 1
+  struct que {
+    int front;
+    int back;
+    int qrtime;
+    int qwtime;
+    struct proc *arr[NPROC];
+  };
+  struct que queues[5];
+#endif
+

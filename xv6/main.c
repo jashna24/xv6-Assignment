@@ -17,6 +17,15 @@ extern char end[]; // first address after kernel loaded from ELF file
 int
 main(void)
 {
+  #ifdef MLFQ
+    for(int i =0;i<5;i++)
+    {
+      queues[i].front = -1;
+      queues[i].back = -1;
+      queues[i].qrtime = 1 << i;
+      queues[i].qwtime = 20;
+    }
+  #endif    
   kinit1(end, P2V(4*1024*1024)); // phys page allocator
   kvmalloc();      // kernel page table
   mpinit();        // detect other processors
@@ -35,6 +44,7 @@ main(void)
   kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
   userinit();      // first user process
   mpmain();        // finish this processor's setup
+
 }
 
 // Other CPUs jump here from entryother.S.

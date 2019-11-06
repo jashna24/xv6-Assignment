@@ -1,3 +1,4 @@
+
 struct buf;
 struct context;
 struct file;
@@ -9,6 +10,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct proc_stat;
 
 // bio.c
 void            binit(void);
@@ -120,9 +122,12 @@ void            sleep(void*, struct spinlock*);
 void            userinit(void);
 int             wait(void);
 int 			waitx(int *, int *);
+int 			getpinfo(struct proc_stat *,int);
 void            wakeup(void*);
 void            yield(void);
 void			update_time(void);
+void			aging(void);
+
 
 // swtch.S
 void            swtch(struct context**, struct context*);

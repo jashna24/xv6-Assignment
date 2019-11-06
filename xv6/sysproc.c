@@ -39,6 +39,20 @@ int sys_waitx(void)
   return waitx(wtime, rtime);
 }
 
+#ifdef MLFQ
+// extern int sys_getpinfo(struct proc_stat *,int);
+int sys_getpinfo(void)
+{
+  int pid;
+  struct proc_stat *stat;
+  if(argptr(0,(char **)&stat,sizeof(struct proc_stat)) < 0)
+    return -1;
+  if(argint(1,&pid) < 0)
+    return -1;
+  return getpinfo(stat,pid);
+}
+#endif
+
 int
 sys_kill(void)
 {

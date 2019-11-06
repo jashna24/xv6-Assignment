@@ -1,16 +1,58 @@
 #include "types.h"
-#include "defs.h"
 #include "param.h"
 #include "memlayout.h"
 #include "mmu.h"
 #include "x86.h"
 #include "proc.h"
+#include "defs.h"
 #include "spinlock.h"
+
+
 
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
 } ptable;
+
+
+#ifdef MLFQ 
+void que_push(struct proc *p)
+{
+  int que = p->qu;
+  if((queues[que].back - queues[que].front + NPROC)%NPROC  == NPROC -1)
+  {
+    cprintf("The queue is full\n");
+  }
+  else
+  {
+    if(queues[que].front == -1)
+      queues[que].front = 0;
+    queues[que].back = (queues[que].back + 1)%NPROC;
+    queues[que].arr[queues[que].back] = p;
+  }
+}
+
+
+void que_pop(struct proc *p)
+{
+  int que = p->qu;
+  if(queues[que].front == -1)
+  {
+    cprintf("The queue is empty\n");
+  }
+  else
+  {
+    if(queues[que].front == queues[que].back)
+    {
+      queues[que].front = -1;
+      queues[que].back = -1;
+    }
+    else
+      queues[que].front = (queues[que].front + 1)%NPROC;
+  }
+}
+
+#endif
 
 static struct proc *initproc;
 
@@ -89,15 +131,27 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
 
-  // #ifdef PRIORITY
+  #ifdef PRIORITY
     p->priority = 60;
-  // #endif
+    // p->priority = pr--;
+  #endif
 
   p->stime = ticks;
   p->etime  = 0;
   p->rtime  = 0;
   p->iotime = 0;
-  p->num_run = 0;
+
+  #ifdef MLFQ
+    p->prtime = 0;
+    p->pwtime = 0;
+    p->qu = 0;
+    p->pinfo.pid = p->pid;
+    p->pinfo.runtime =0;
+    p->pinfo.num_run = 0;
+    p->pinfo.current_queue = 0;
+    for(int i=0;i<5;i++)
+      p->pinfo.ticks[i] = 0;
+  #endif  
 
   release(&ptable.lock);
 
@@ -122,7 +176,9 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
-
+  #ifdef MLFQ
+    que_push(p);
+  #endif
   return p;
 }
 
@@ -213,7 +269,6 @@ fork(void)
 
   // Clear %eax so that fork returns 0 in the child.
   np->tf->eax = 0;
-
   for(i = 0; i < NOFILE; i++)
     if(curproc->ofile[i])
       np->ofile[i] = filedup(curproc->ofile[i]);
@@ -222,6 +277,7 @@ fork(void)
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
   pid = np->pid;
+  // cprintf("child process with pid %d\n",pid);
 
   acquire(&ptable.lock);
 
@@ -280,6 +336,36 @@ exit(void)
   panic("zombie exit");
 }
 
+#ifdef MLFQ
+int getpinfo(struct proc_stat *pr,int id)
+{
+    struct proc *p;
+    // cprintf("********%d*******\n",id);
+  acquire(&ptable.lock);
+    pr->pid = -1;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+    {
+        if(p->pid == id)
+        {
+          pr->pid = p->pinfo.pid; 
+          pr->num_run = p->pinfo.num_run;
+          pr->runtime = p->pinfo.runtime;
+          pr->current_queue = p->qu;
+          // cprintf("\npid %d , qu %d\n",pr->pid,pr->current_queue);
+          for(int i=0;i<5;i++)
+          {
+            pr->ticks[i] = p->pinfo.ticks[i];
+          }
+
+          break;
+        }
+    }
+  release(&ptable.lock);
+
+  return 0;
+
+}
+#endif
 int waitx(int *wtime, int *rtime)
 {
   struct proc *p;
@@ -380,7 +466,6 @@ wait(void)
 void
 scheduler(void)
 {
-  struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
   
@@ -389,9 +474,11 @@ scheduler(void)
     // Enable interrupts on this processor.
     sti();
 
+
     // Loop over process table looking for process to run.
     #ifdef DEFAULT
       acquire(&ptable.lock);
+      struct proc *p;
       for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
       {
   	        if(p->state != RUNNABLE)
@@ -399,7 +486,6 @@ scheduler(void)
   	        c->proc = p;
   	        switchuvm(p);
   	        p->state = RUNNING;
-            // cprintf("%d ****** %d\n",c->apicid,p->pid);
   	        swtch(&(c->scheduler), p->context);
   	        switchkvm();
   	        c->proc = 0;
@@ -408,6 +494,7 @@ scheduler(void)
     #else
       #ifdef FCFS
         acquire(&ptable.lock);
+        struct proc *p;
         struct proc *min_ctime = 0;
         for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
         {
@@ -427,7 +514,6 @@ scheduler(void)
 
         if(min_ctime !=0)
         {  
-          cprintf("%d ****** %d\n",c->apicid,min_ctime->pid);
           c->proc = min_ctime;
           switchuvm(min_ctime);
           min_ctime->state = RUNNING;
@@ -439,42 +525,9 @@ scheduler(void)
         release(&ptable.lock);
     #else
       #ifdef PRIORITY
-        // acquire(&ptable.lock);
-        // struct proc *maxP = 0;
-        // for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-        // {
-        //   if(p->state != RUNNABLE)
-        //   continue;
-
-        //   if(maxP == 0)
-        //   {
-        //     maxP = p;
-        //   }
-        //   else if(maxP->priority > p->priority)
-        //     maxP = p;
-        //   else if(maxP->priority == p->priority)
-        //   {
-        //     if(p->num_run < maxP->num_run)
-        //       maxP = p;
-        //   }
-
-        // }
-        // if(maxP !=0)
-        // {  
-        //   c->proc = maxP;
-        //   maxP->num_run++;
-        //   switchuvm(maxP);
-        //   maxP->state = RUNNING;
-
-        //   swtch(&(c->scheduler), maxP->context);
-        //   switchkvm();
-        //   c->proc = 0;
-
-        // }   
-        // release(&ptable.lock);
-
         acquire(&ptable.lock);
         struct proc *maxP = 0;
+        struct proc *p;
         struct proc *q = 0;
         for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
         {
@@ -492,7 +545,6 @@ scheduler(void)
 	        if(maxP !=0)
 	        {  
 	          c->proc = maxP;
-	          maxP->num_run++;
 	          switchuvm(maxP);
 	          maxP->state = RUNNING;
 
@@ -503,6 +555,34 @@ scheduler(void)
         }
         
         release(&ptable.lock);
+    #else
+      #ifdef MLFQ
+        acquire(&ptable.lock);
+        struct proc *p=0;
+        for(int i =0;i<5;i++)
+        {
+          if(queues[i].front != -1 && queues[i].arr[queues[i].front]->state == RUNNABLE)
+          {
+            p = queues[i].arr[queues[i].front];
+            que_pop(p);
+            break;
+          }
+
+        }
+        if(p!=0)
+        {   
+            p->pinfo.num_run++;
+            // cprintf("queue: %d, pid: %d,rtime: %d, wtime: %d\n",p->qu,p->pid,p->rtime,p->pwtime);
+            c->proc = p;
+            switchuvm(p);
+            p->state = RUNNING;
+
+            swtch(&(c->scheduler), p->context);
+            switchkvm();
+            c->proc = 0;
+        }
+        release(&ptable.lock);
+      #endif    
       #endif    
       #endif    
       #endif    
@@ -557,12 +637,53 @@ yield(void)
 
     }
     release(&ptable.lock);
-
   #else
-    acquire(&ptable.lock);  //DOC: yieldlock
-    myproc()->state = RUNNABLE;
-    sched();
-    release(&ptable.lock);
+    #ifdef DEFAULT
+      acquire(&ptable.lock);  //DOC: yieldlock
+      myproc()->state = RUNNABLE;
+      sched();
+      release(&ptable.lock);
+  #else
+    #ifdef MLFQ
+      acquire(&ptable.lock);  //DOC: yieldlock
+      if(myproc()->prtime >= queues[myproc()->qu].qrtime)
+      {
+        if(myproc()->qu < 4)
+          myproc()->qu++;
+        // cprintf("promotion of pid: %d to %d\n",myproc()->pid,myproc()->qu);
+
+        myproc()->pinfo.current_queue = myproc()->qu;
+        // cprintf("\npid: %d queue: %d\n",myproc()->pid,myproc()->pinfo.current_queue);
+        myproc()->prtime = 0;
+        myproc()->pwtime = 0;
+        myproc()->state = RUNNABLE;
+        que_push(myproc());
+        sched();
+      }
+      else
+      {
+        int prempt = 0;
+        for(int j =0;j<myproc()->qu;j++)
+        {
+          if(queues[j].front != -1 && queues[j].arr[queues[j].front]->state == RUNNABLE)
+          {
+            prempt = 1;
+            break;
+          }
+        }
+
+        if(prempt == 1)
+        {
+          myproc()->prtime = 0;
+          myproc()->pwtime = 0;
+          myproc()->state = RUNNABLE;
+          que_push(myproc());
+          sched();   
+        }
+      }  
+      release(&ptable.lock);
+  #endif
+  #endif
   #endif
 
 }
@@ -637,7 +758,14 @@ wakeup1(void *chan)
 
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
     if(p->state == SLEEPING && p->chan == chan)
+    {
       p->state = RUNNABLE;
+      #ifdef MLFQ
+        p->pwtime = 0;
+        p->prtime = 0;
+        que_push(p);
+      #endif
+    }    
 }
 
 // Wake up all processes sleeping on chan.
@@ -751,3 +879,46 @@ int set_priority(int pid, int priority)
 
   return old_priority;
 }
+
+#ifdef MLFQ
+void aging()
+{
+  struct proc *p;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if(p->state == RUNNABLE)
+    {
+      p->pwtime++;
+    }  
+    else if(p->state == RUNNING)
+    {  
+      p->prtime++;
+      p->pinfo.runtime++;
+      p->pinfo.ticks[p->qu]++;
+    }
+  }
+
+  for(int i =0;i<5;i++)
+  {
+    while(queues[i].front != -1 && queues[i].arr[queues[i].front]->state == RUNNABLE && queues[i].arr[queues[i].front]->pwtime >= queues[i].qwtime)
+    {
+      p = queues[i].arr[queues[i].front];
+      if(p->qu > 0)
+        {
+          que_pop(p);
+          p->qu--;
+          // cprintf("aging of pid: %d to %d\n",p->pid,p->qu);
+          p->pinfo.current_queue = p->qu;
+          // cprintf("\npid: %d queue: %d\n",p->pid,p->pinfo.current_queue);
+
+          p->pwtime = 0;
+          p->prtime = 0;
+          que_push(p);
+        }
+    }
+  }
+  release(&ptable.lock);
+}
+
+#endif
