@@ -5,12 +5,13 @@
 
 int main(int argc, char *argv[])
 {
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < 100; i++)
   {
     int pid = fork();
 
     if(pid == 0)
     {
+      sleep(20);
       for(int j = 0; j < 1000000; j++)
       {
         int x = ((456 + 56/7)%10)%97;
@@ -22,7 +23,7 @@ int main(int argc, char *argv[])
 
   }
 
-  for(int i = 0; i < 6; i++)
+  for(int i = 0; i < 100; i++)
   {
     wait();
   }

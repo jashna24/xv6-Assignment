@@ -350,7 +350,7 @@ int getpinfo(struct proc_stat *pr,int id)
           pr->pid = p->pinfo.pid; 
           pr->num_run = p->pinfo.num_run;
           pr->runtime = p->pinfo.runtime;
-          pr->current_queue = p->qu;
+          pr->current_queue = p->pinfo.current_queue;
           // cprintf("\npid %d , qu %d\n",pr->pid,pr->current_queue);
           for(int i=0;i<5;i++)
           {

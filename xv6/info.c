@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	pid = atoi(argv[1]);
 	getpinfo(&p, pid);
 	if(p.pid !=-1)
-	printf(1,"pid: %d\nruntime:%d\nnum_run: %d\nqueue: %d\nticks: %d %d %d %d %d\n",p.pid,p.runtime,p.num_run,p.current_queue,p.ticks[0],p.ticks[1],p.ticks[2],p.ticks[3],p.ticks[4]);
+		printf(1,"pid: %d\nruntime:%d\nnum_run: %d\ncurrent_queue: %d\nticks: %d %d %d %d %d\n",p.pid,p.runtime,p.num_run,p.current_queue,p.ticks[0],p.ticks[1],p.ticks[2],p.ticks[3],p.ticks[4]);
 	else
 	{
 		printf(1,"pid not found\n");
