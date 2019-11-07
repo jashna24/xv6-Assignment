@@ -132,8 +132,8 @@ found:
   p->pid = nextpid++;
 
   #ifdef PBS
-    // p->priority = 60;
-    p->priority = pr--;
+    // p->priority = p->pid/2;
+    p->priority = 60;
   #endif
 
   p->stime = ticks;
@@ -277,11 +277,17 @@ fork(void)
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
   pid = np->pid;
-  // cprintf("child process with pid %d\n",pid);
+  //tester 
+  cprintf("child process with pid %d\n",pid);
 
   acquire(&ptable.lock);
 
   np->state = RUNNABLE;
+
+  // tester PBS
+  // #ifdef PBS
+  //   np->priority = np->pid/2;
+  // #endif
 
   release(&ptable.lock);
 
@@ -484,6 +490,7 @@ scheduler(void)
   	        if(p->state != RUNNABLE)
   	          continue;
   	        c->proc = p;
+            cprintf("cpu %d Pname %s pid %d runtime %d\n",c->apicid,p->name,p->pid,p->rtime);
   	        switchuvm(p);
   	        p->state = RUNNING;
   	        swtch(&(c->scheduler), p->context);
@@ -513,7 +520,8 @@ scheduler(void)
         }
 
         if(min_ctime !=0)
-        {  
+        { 
+            cprintf("cpu %d Pname %s pid %d runtime %d\n",c->apicid,min_ctime->name,min_ctime->pid,min_ctime->rtime);
           c->proc = min_ctime;
           switchuvm(min_ctime);
           min_ctime->state = RUNNING;
@@ -544,6 +552,7 @@ scheduler(void)
 
 	        if(maxP !=0)
 	        {  
+            cprintf("cpu %d Pname %s pid %d priority %d runtime %d\n",c->apicid,maxP->name,maxP->pid,maxP->priority,maxP->rtime);
 	          c->proc = maxP;
 	          switchuvm(maxP);
 	          maxP->state = RUNNING;
@@ -572,7 +581,7 @@ scheduler(void)
         if(p!=0)
         {   
             p->pinfo.num_run++;
-            // cprintf("queue: %d, pid: %d,rtime: %d, wtime: %d\n",p->qu,p->pid,p->rtime,p->pwtime);
+            cprintf("queue: %d, pid: %d,rtime: %d, wtime: %d\n",p->qu,p->pid,p->rtime,p->pwtime);
             c->proc = p;
             switchuvm(p);
             p->state = RUNNING;
@@ -651,7 +660,7 @@ yield(void)
       {
         if(myproc()->qu < 4)
           myproc()->qu++;
-        // cprintf("demotion of pid: %d to %d\n",myproc()->pid,myproc()->qu);
+        cprintf("demotion of pid: %d to %d\n",myproc()->pid,myproc()->qu);
 
         myproc()->pinfo.current_queue = myproc()->qu;
         // cprintf("\npid: %d queue: %d\n",myproc()->pid,myproc()->pinfo.current_queue);
@@ -821,6 +830,23 @@ procdump(void)
   char *state;
   uint pc[10];
 
+  // #ifdef MLFQ
+  //   for(int i = 0; i < 5; i++)
+  //   {
+  //     if(queues[i].front == -1)
+  //     {
+  //       cprintf("Queue %d is empty\n", i);
+  //       continue;
+  //     }
+  //     int flag = 1;
+  //     for(int j = queues[i].front; flag || j%NPROC != (queues[i].back+1)%NPROC; j++)
+  //     {
+  //       flag = 0;
+  //       cprintf("queue %d  pid %d\n", i, queues[i].arr[j%NPROC]->pid);
+  //     } 
+  //   }
+  // #endif
+
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
     if(p->state == UNUSED)
       continue;
@@ -909,7 +935,7 @@ void aging()
         {
           que_pop(p);
           p->qu--;
-          // cprintf("aging of pid: %d to %d\n",p->pid,p->qu);
+          cprintf("aging of pid: %d to %d\n",p->pid,p->qu);
           p->pinfo.current_queue = p->qu;
           // cprintf("\npid: %d queue: %d\n",p->pid,p->pinfo.current_queue);
 

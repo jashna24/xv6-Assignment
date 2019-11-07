@@ -10,7 +10,7 @@ Disassembly of section .text:
 #include "pinfo.h"
 
 int main(int argc, char *argv[])
-{	
+{
    0:	8d 4c 24 04          	lea    0x4(%esp),%ecx
    4:	83 e4 f0             	and    $0xfffffff0,%esp
    7:	ff 71 fc             	pushl  -0x4(%ecx)

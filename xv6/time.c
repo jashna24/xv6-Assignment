@@ -6,6 +6,11 @@
 int main(int argc, char *argv[])
 {
 	int pid,run_time,wait_time;
+	if(argc < 2)
+	{
+		printf(1,"Please enter correct number of arguments\n");	
+		exit();
+	}
 	
 
 	pid = fork();

@@ -20,20 +20,27 @@ int main(int argc, char *argv[])
    e:	56                   	push   %esi
    f:	53                   	push   %ebx
   10:	51                   	push   %ecx
-  11:	8d b5 20 ff ff ff    	lea    -0xe0(%ebp),%esi
-  17:	8d 5d e8             	lea    -0x18(%ebp),%ebx
-  1a:	81 ec e8 00 00 00    	sub    $0xe8,%esp
-  20:	8b 01                	mov    (%ecx),%eax
-  22:	8b 79 04             	mov    0x4(%ecx),%edi
-  25:	89 85 14 ff ff ff    	mov    %eax,-0xec(%ebp)
+  11:	81 ec e8 00 00 00    	sub    $0xe8,%esp
+  17:	8b 01                	mov    (%ecx),%eax
+  19:	8b 79 04             	mov    0x4(%ecx),%edi
 	int pid,run_time,wait_time;
+	if(argc < 2)
+  1c:	83 f8 01             	cmp    $0x1,%eax
+{
+  1f:	89 85 14 ff ff ff    	mov    %eax,-0xec(%ebp)
+	if(argc < 2)
+  25:	0f 8e c0 00 00 00    	jle    eb <main+0xeb>
+  2b:	8d b5 20 ff ff ff    	lea    -0xe0(%ebp),%esi
+  31:	8d 5d e8             	lea    -0x18(%ebp),%ebx
+		printf(1,"Please enter correct number of arguments\n");	
+		exit();
+	}
 	
 
 	pid = fork();
-  2b:	e8 1a 03 00 00       	call   34a <fork>
-  30:	89 85 10 ff ff ff    	mov    %eax,-0xf0(%ebp)
-  36:	8d 76 00             	lea    0x0(%esi),%esi
-  39:	8d bc 27 00 00 00 00 	lea    0x0(%edi,%eiz,1),%edi
+  34:	e8 11 03 00 00       	call   34a <fork>
+  39:	89 85 10 ff ff ff    	mov    %eax,-0xf0(%ebp)
+  3f:	90                   	nop
 
 	char *com[50];
 	for(int i=0;i<50;i++)
@@ -51,74 +58,76 @@ int main(int argc, char *argv[])
 	}
 	int len  = argc;
 	for(int i = 1;i<len;i++)
-  57:	83 bd 14 ff ff ff 01 	cmpl   $0x1,-0xec(%ebp)
-  5e:	7e 1d                	jle    7d <main+0x7d>
-  60:	b8 01 00 00 00       	mov    $0x1,%eax
-  65:	8d 76 00             	lea    0x0(%esi),%esi
+  57:	b8 01 00 00 00       	mov    $0x1,%eax
+  5c:	eb 04                	jmp    62 <main+0x62>
+  5e:	66 90                	xchg   %ax,%ax
+  60:	89 d0                	mov    %edx,%eax
 	{
 		com[i-1]=argv[i];
-  68:	8b 14 87             	mov    (%edi,%eax,4),%edx
-  6b:	89 94 85 1c ff ff ff 	mov    %edx,-0xe4(%ebp,%eax,4)
+  62:	8b 14 87             	mov    (%edi,%eax,4),%edx
+  65:	89 94 85 1c ff ff ff 	mov    %edx,-0xe4(%ebp,%eax,4)
 	for(int i = 1;i<len;i++)
-  72:	83 c0 01             	add    $0x1,%eax
-  75:	39 85 14 ff ff ff    	cmp    %eax,-0xec(%ebp)
-  7b:	75 eb                	jne    68 <main+0x68>
+  6c:	8d 50 01             	lea    0x1(%eax),%edx
+  6f:	39 95 14 ff ff ff    	cmp    %edx,-0xec(%ebp)
+  75:	75 e9                	jne    60 <main+0x60>
 	}
 	com[argc-1] = 0;
 
 
 	if(pid==0)
-  7d:	8b 8d 10 ff ff ff    	mov    -0xf0(%ebp),%ecx
+  77:	83 bd 10 ff ff ff 00 	cmpl   $0x0,-0xf0(%ebp)
 	com[argc-1] = 0;
-  83:	8b 85 14 ff ff ff    	mov    -0xec(%ebp),%eax
+  7e:	c7 84 85 20 ff ff ff 	movl   $0x0,-0xe0(%ebp,%eax,4)
+  85:	00 00 00 00 
 	if(pid==0)
-  89:	85 c9                	test   %ecx,%ecx
-	com[argc-1] = 0;
-  8b:	c7 84 85 1c ff ff ff 	movl   $0x0,-0xe4(%ebp,%eax,4)
-  92:	00 00 00 00 
-	if(pid==0)
-  96:	75 2e                	jne    c6 <main+0xc6>
-	{
-		exec(com[0], com);
-  98:	8d 85 20 ff ff ff    	lea    -0xe0(%ebp),%eax
-  9e:	52                   	push   %edx
-  9f:	52                   	push   %edx
-  a0:	50                   	push   %eax
-  a1:	ff b5 20 ff ff ff    	pushl  -0xe0(%ebp)
-  a7:	e8 ee 02 00 00       	call   39a <exec>
+  89:	74 35                	je     c0 <main+0xc0>
     	printf(1, "exec %s failed\n", argv[1]);
-  ac:	83 c4 0c             	add    $0xc,%esp
-  af:	ff 77 04             	pushl  0x4(%edi)
-  b2:	68 08 08 00 00       	push   $0x808
-  b7:	6a 01                	push   $0x1
-  b9:	e8 f2 03 00 00       	call   4b0 <printf>
-  be:	83 c4 10             	add    $0x10,%esp
+	}
+
+	else
 	{	
 		waitx(&wait_time, &run_time);
+  8b:	50                   	push   %eax
+  8c:	50                   	push   %eax
+  8d:	8d 85 18 ff ff ff    	lea    -0xe8(%ebp),%eax
+  93:	50                   	push   %eax
+  94:	8d 85 1c ff ff ff    	lea    -0xe4(%ebp),%eax
+  9a:	50                   	push   %eax
+  9b:	e8 c2 02 00 00       	call   362 <waitx>
 		printf(1,"run time: %d, wait time: %d\n",run_time,wait_time);
+  a0:	ff b5 1c ff ff ff    	pushl  -0xe4(%ebp)
+  a6:	ff b5 18 ff ff ff    	pushl  -0xe8(%ebp)
+  ac:	68 44 08 00 00       	push   $0x844
+  b1:	6a 01                	push   $0x1
+  b3:	e8 f8 03 00 00       	call   4b0 <printf>
+  b8:	83 c4 20             	add    $0x20,%esp
 	}
 
 	exit();
-  c1:	e8 8c 02 00 00       	call   352 <exit>
-		waitx(&wait_time, &run_time);
-  c6:	50                   	push   %eax
-  c7:	50                   	push   %eax
-  c8:	8d 85 18 ff ff ff    	lea    -0xe8(%ebp),%eax
-  ce:	50                   	push   %eax
-  cf:	8d 85 1c ff ff ff    	lea    -0xe4(%ebp),%eax
-  d5:	50                   	push   %eax
-  d6:	e8 87 02 00 00       	call   362 <waitx>
-		printf(1,"run time: %d, wait time: %d\n",run_time,wait_time);
-  db:	ff b5 1c ff ff ff    	pushl  -0xe4(%ebp)
-  e1:	ff b5 18 ff ff ff    	pushl  -0xe8(%ebp)
-  e7:	68 18 08 00 00       	push   $0x818
-  ec:	6a 01                	push   $0x1
-  ee:	e8 bd 03 00 00       	call   4b0 <printf>
-  f3:	83 c4 20             	add    $0x20,%esp
-  f6:	eb c9                	jmp    c1 <main+0xc1>
-  f8:	66 90                	xchg   %ax,%ax
-  fa:	66 90                	xchg   %ax,%ax
-  fc:	66 90                	xchg   %ax,%ax
+  bb:	e8 92 02 00 00       	call   352 <exit>
+		exec(com[0], com);
+  c0:	8d 85 20 ff ff ff    	lea    -0xe0(%ebp),%eax
+  c6:	52                   	push   %edx
+  c7:	52                   	push   %edx
+  c8:	50                   	push   %eax
+  c9:	ff b5 20 ff ff ff    	pushl  -0xe0(%ebp)
+  cf:	e8 c6 02 00 00       	call   39a <exec>
+    	printf(1, "exec %s failed\n", argv[1]);
+  d4:	83 c4 0c             	add    $0xc,%esp
+  d7:	ff 77 04             	pushl  0x4(%edi)
+  da:	68 34 08 00 00       	push   $0x834
+  df:	6a 01                	push   $0x1
+  e1:	e8 ca 03 00 00       	call   4b0 <printf>
+  e6:	83 c4 10             	add    $0x10,%esp
+  e9:	eb d0                	jmp    bb <main+0xbb>
+		printf(1,"Please enter correct number of arguments\n");	
+  eb:	51                   	push   %ecx
+  ec:	51                   	push   %ecx
+  ed:	68 08 08 00 00       	push   $0x808
+  f2:	6a 01                	push   $0x1
+  f4:	e8 b7 03 00 00       	call   4b0 <printf>
+		exit();
+  f9:	e8 54 02 00 00       	call   352 <exit>
   fe:	66 90                	xchg   %ax,%ax
 
 00000100 <strcpy>:
@@ -710,7 +719,7 @@ printint(int fd, int xx, int base, int sgn)
  442:	31 d2                	xor    %edx,%edx
  444:	8d 7e 01             	lea    0x1(%esi),%edi
  447:	f7 f1                	div    %ecx
- 449:	0f b6 92 3c 08 00 00 	movzbl 0x83c(%edx),%edx
+ 449:	0f b6 92 68 08 00 00 	movzbl 0x868(%edx),%edx
   }while((x /= base) != 0);
  450:	85 c0                	test   %eax,%eax
     buf[i++] = digits[x % base];
@@ -1001,7 +1010,7 @@ printf(int fd, const char *fmt, ...)
  662:	31 ff                	xor    %edi,%edi
  664:	e9 8f fe ff ff       	jmp    4f8 <printf+0x48>
           s = "(null)";
- 669:	bb 35 08 00 00       	mov    $0x835,%ebx
+ 669:	bb 61 08 00 00       	mov    $0x861,%ebx
         while(*s != 0){
  66e:	b8 28 00 00 00       	mov    $0x28,%eax
  673:	e9 72 ff ff ff       	jmp    5ea <printf+0x13a>
@@ -1022,7 +1031,7 @@ free(void *ap)
 
   bp = (Header*)ap - 1;
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
- 681:	a1 ec 0a 00 00       	mov    0xaec,%eax
+ 681:	a1 18 0b 00 00       	mov    0xb18,%eax
 {
  686:	89 e5                	mov    %esp,%ebp
  688:	57                   	push   %edi
@@ -1063,7 +1072,7 @@ free(void *ap)
     p->s.ptr = bp;
  6bd:	89 08                	mov    %ecx,(%eax)
   freep = p;
- 6bf:	a3 ec 0a 00 00       	mov    %eax,0xaec
+ 6bf:	a3 18 0b 00 00       	mov    %eax,0xb18
 }
  6c4:	5b                   	pop    %ebx
  6c5:	5e                   	pop    %esi
@@ -1095,7 +1104,7 @@ free(void *ap)
     p->s.size += bp->s.size;
  6f7:	03 53 fc             	add    -0x4(%ebx),%edx
   freep = p;
- 6fa:	a3 ec 0a 00 00       	mov    %eax,0xaec
+ 6fa:	a3 18 0b 00 00       	mov    %eax,0xb18
     p->s.size += bp->s.size;
  6ff:	89 50 04             	mov    %edx,0x4(%eax)
     p->s.ptr = bp->s.ptr;
@@ -1128,7 +1137,7 @@ malloc(uint nbytes)
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  719:	8b 45 08             	mov    0x8(%ebp),%eax
   if((prevp = freep) == 0){
- 71c:	8b 15 ec 0a 00 00    	mov    0xaec,%edx
+ 71c:	8b 15 18 0b 00 00    	mov    0xb18,%edx
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  722:	8d 78 07             	lea    0x7(%eax),%edi
  725:	c1 ef 03             	shr    $0x3,%edi
@@ -1165,7 +1174,7 @@ malloc(uint nbytes)
       return (void*)(p + 1);
     }
     if(p == freep)
- 761:	39 05 ec 0a 00 00    	cmp    %eax,0xaec
+ 761:	39 05 18 0b 00 00    	cmp    %eax,0xb18
  767:	89 c2                	mov    %eax,%edx
  769:	75 ed                	jne    758 <malloc+0x48>
   p = sbrk(nu * sizeof(Header));
@@ -1184,7 +1193,7 @@ malloc(uint nbytes)
  785:	50                   	push   %eax
  786:	e8 f5 fe ff ff       	call   680 <free>
   return freep;
- 78b:	8b 15 ec 0a 00 00    	mov    0xaec,%edx
+ 78b:	8b 15 18 0b 00 00    	mov    0xb18,%edx
       if((p = morecore(nunits)) == 0)
  791:	83 c4 10             	add    $0x10,%esp
  794:	85 d2                	test   %edx,%edx
@@ -1213,7 +1222,7 @@ malloc(uint nbytes)
         p->s.size = nunits;
  7b4:	89 78 04             	mov    %edi,0x4(%eax)
       freep = prevp;
- 7b7:	89 15 ec 0a 00 00    	mov    %edx,0xaec
+ 7b7:	89 15 18 0b 00 00    	mov    %edx,0xb18
 }
  7bd:	8d 65 f4             	lea    -0xc(%ebp),%esp
       return (void*)(p + 1);
@@ -1227,13 +1236,13 @@ malloc(uint nbytes)
  7c8:	90                   	nop
  7c9:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
     base.s.ptr = freep = prevp = &base;
- 7d0:	c7 05 ec 0a 00 00 f0 	movl   $0xaf0,0xaec
- 7d7:	0a 00 00 
- 7da:	c7 05 f0 0a 00 00 f0 	movl   $0xaf0,0xaf0
- 7e1:	0a 00 00 
+ 7d0:	c7 05 18 0b 00 00 1c 	movl   $0xb1c,0xb18
+ 7d7:	0b 00 00 
+ 7da:	c7 05 1c 0b 00 00 1c 	movl   $0xb1c,0xb1c
+ 7e1:	0b 00 00 
     base.s.size = 0;
- 7e4:	b8 f0 0a 00 00       	mov    $0xaf0,%eax
- 7e9:	c7 05 f4 0a 00 00 00 	movl   $0x0,0xaf4
+ 7e4:	b8 1c 0b 00 00       	mov    $0xb1c,%eax
+ 7e9:	c7 05 20 0b 00 00 00 	movl   $0x0,0xb20
  7f0:	00 00 00 
  7f3:	e9 44 ff ff ff       	jmp    73c <malloc+0x2c>
  7f8:	90                   	nop

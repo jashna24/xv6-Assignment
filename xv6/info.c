@@ -5,8 +5,14 @@
 #include "pinfo.h"
 
 int main(int argc, char *argv[])
-{	
+{
 	#ifdef MLFQ
+	if(argc != 2)
+	{
+		printf(1,"Please enter correct number of arguments\n");	
+		exit();
+	}
+
 	int pid;
 	struct proc_stat p;
 
