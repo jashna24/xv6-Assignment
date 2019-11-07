@@ -8,7 +8,7 @@
 #include "spinlock.h"
 
 
-
+int pr =60;
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -131,9 +131,9 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
 
-  #ifdef PRIORITY
+  #ifdef PBS
     p->priority = 60;
-    // p->priority = pr--;
+    // p->priority = pr++;
   #endif
 
   p->stime = ticks;
@@ -524,7 +524,7 @@ scheduler(void)
         } 
         release(&ptable.lock);
     #else
-      #ifdef PRIORITY
+      #ifdef PBS
         acquire(&ptable.lock);
         struct proc *maxP = 0;
         struct proc *p;
@@ -621,7 +621,7 @@ sched(void)
 void
 yield(void)
 {
-  #ifdef PRIORITY 
+  #ifdef PBS 
     acquire(&ptable.lock);  //DOC: yieldlock
     struct proc *p;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++)
@@ -631,6 +631,7 @@ yield(void)
 
       if(p->priority <= myproc()->priority)
       { 
+      	// cprintf("Pid: %d got preemptied\n",myproc()->pid);
         myproc()->state = RUNNABLE;
         sched();
       }  
@@ -650,7 +651,7 @@ yield(void)
       {
         if(myproc()->qu < 4)
           myproc()->qu++;
-        // cprintf("promotion of pid: %d to %d\n",myproc()->pid,myproc()->qu);
+        // cprintf("demotion of pid: %d to %d\n",myproc()->pid,myproc()->qu);
 
         myproc()->pinfo.current_queue = myproc()->qu;
         // cprintf("\npid: %d queue: %d\n",myproc()->pid,myproc()->pinfo.current_queue);

@@ -39,11 +39,11 @@ main(void)
   33:	c7 04 24 00 00 00 00 	movl   $0x0,(%esp)
   3a:	e8 8b 03 00 00       	call   3ca <dup>
   #else
-  #ifdef FCFS
-    printf(1, "Scheduler policy: FCFS\n");
+  #ifdef PBS
+    printf(1, "Scheduler policy: PBS\n");
   #else
-  #ifdef PRIORITY
-    printf(1, "Scheduler policy: PRIORITY\n");
+  #ifdef MLFQ
+    printf(1, "Scheduler policy: MLFQ\n");
   3f:	58                   	pop    %eax
   40:	5a                   	pop    %edx
   41:	68 00 08 00 00       	push   $0x800
@@ -57,7 +57,7 @@ main(void)
   for(;;){
     printf(1, "init: starting sh\n");
   50:	83 ec 08             	sub    $0x8,%esp
-  53:	68 1c 08 00 00       	push   $0x81c
+  53:	68 18 08 00 00       	push   $0x818
   58:	6a 01                	push   $0x1
   5a:	e8 41 04 00 00       	call   4a0 <printf>
     pid = fork();
@@ -87,7 +87,7 @@ main(void)
   7b:	74 d3                	je     50 <main+0x50>
       printf(1, "zombie!\n");
   7d:	83 ec 08             	sub    $0x8,%esp
-  80:	68 5b 08 00 00       	push   $0x85b
+  80:	68 57 08 00 00       	push   $0x857
   85:	6a 01                	push   $0x1
   87:	e8 14 04 00 00       	call   4a0 <printf>
   8c:	83 c4 10             	add    $0x10,%esp
@@ -95,7 +95,7 @@ main(void)
       printf(1, "init: fork failed\n");
   91:	53                   	push   %ebx
   92:	53                   	push   %ebx
-  93:	68 2f 08 00 00       	push   $0x82f
+  93:	68 2b 08 00 00       	push   $0x82b
   98:	6a 01                	push   $0x1
   9a:	e8 01 04 00 00       	call   4a0 <printf>
       exit();
@@ -103,13 +103,13 @@ main(void)
       exec("sh", argv);
   a4:	50                   	push   %eax
   a5:	50                   	push   %eax
-  a6:	68 14 0b 00 00       	push   $0xb14
-  ab:	68 42 08 00 00       	push   $0x842
+  a6:	68 10 0b 00 00       	push   $0xb10
+  ab:	68 3e 08 00 00       	push   $0x83e
   b0:	e8 d5 02 00 00       	call   38a <exec>
       printf(1, "init: exec sh failed\n");
   b5:	5a                   	pop    %edx
   b6:	59                   	pop    %ecx
-  b7:	68 45 08 00 00       	push   $0x845
+  b7:	68 41 08 00 00       	push   $0x841
   bc:	6a 01                	push   $0x1
   be:	e8 dd 03 00 00       	call   4a0 <printf>
       exit();
@@ -720,7 +720,7 @@ printint(int fd, int xx, int base, int sgn)
  432:	31 d2                	xor    %edx,%edx
  434:	8d 7e 01             	lea    0x1(%esi),%edi
  437:	f7 f1                	div    %ecx
- 439:	0f b6 92 6c 08 00 00 	movzbl 0x86c(%edx),%edx
+ 439:	0f b6 92 68 08 00 00 	movzbl 0x868(%edx),%edx
   }while((x /= base) != 0);
  440:	85 c0                	test   %eax,%eax
     buf[i++] = digits[x % base];
@@ -1011,7 +1011,7 @@ printf(int fd, const char *fmt, ...)
  652:	31 ff                	xor    %edi,%edi
  654:	e9 8f fe ff ff       	jmp    4e8 <printf+0x48>
           s = "(null)";
- 659:	bb 64 08 00 00       	mov    $0x864,%ebx
+ 659:	bb 60 08 00 00       	mov    $0x860,%ebx
         while(*s != 0){
  65e:	b8 28 00 00 00       	mov    $0x28,%eax
  663:	e9 72 ff ff ff       	jmp    5da <printf+0x13a>
@@ -1032,7 +1032,7 @@ free(void *ap)
 
   bp = (Header*)ap - 1;
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
- 671:	a1 1c 0b 00 00       	mov    0xb1c,%eax
+ 671:	a1 18 0b 00 00       	mov    0xb18,%eax
 {
  676:	89 e5                	mov    %esp,%ebp
  678:	57                   	push   %edi
@@ -1073,7 +1073,7 @@ free(void *ap)
     p->s.ptr = bp;
  6ad:	89 08                	mov    %ecx,(%eax)
   freep = p;
- 6af:	a3 1c 0b 00 00       	mov    %eax,0xb1c
+ 6af:	a3 18 0b 00 00       	mov    %eax,0xb18
 }
  6b4:	5b                   	pop    %ebx
  6b5:	5e                   	pop    %esi
@@ -1105,7 +1105,7 @@ free(void *ap)
     p->s.size += bp->s.size;
  6e7:	03 53 fc             	add    -0x4(%ebx),%edx
   freep = p;
- 6ea:	a3 1c 0b 00 00       	mov    %eax,0xb1c
+ 6ea:	a3 18 0b 00 00       	mov    %eax,0xb18
     p->s.size += bp->s.size;
  6ef:	89 50 04             	mov    %edx,0x4(%eax)
     p->s.ptr = bp->s.ptr;
@@ -1138,7 +1138,7 @@ malloc(uint nbytes)
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  709:	8b 45 08             	mov    0x8(%ebp),%eax
   if((prevp = freep) == 0){
- 70c:	8b 15 1c 0b 00 00    	mov    0xb1c,%edx
+ 70c:	8b 15 18 0b 00 00    	mov    0xb18,%edx
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  712:	8d 78 07             	lea    0x7(%eax),%edi
  715:	c1 ef 03             	shr    $0x3,%edi
@@ -1175,7 +1175,7 @@ malloc(uint nbytes)
       return (void*)(p + 1);
     }
     if(p == freep)
- 751:	39 05 1c 0b 00 00    	cmp    %eax,0xb1c
+ 751:	39 05 18 0b 00 00    	cmp    %eax,0xb18
  757:	89 c2                	mov    %eax,%edx
  759:	75 ed                	jne    748 <malloc+0x48>
   p = sbrk(nu * sizeof(Header));
@@ -1194,7 +1194,7 @@ malloc(uint nbytes)
  775:	50                   	push   %eax
  776:	e8 f5 fe ff ff       	call   670 <free>
   return freep;
- 77b:	8b 15 1c 0b 00 00    	mov    0xb1c,%edx
+ 77b:	8b 15 18 0b 00 00    	mov    0xb18,%edx
       if((p = morecore(nunits)) == 0)
  781:	83 c4 10             	add    $0x10,%esp
  784:	85 d2                	test   %edx,%edx
@@ -1223,7 +1223,7 @@ malloc(uint nbytes)
         p->s.size = nunits;
  7a4:	89 78 04             	mov    %edi,0x4(%eax)
       freep = prevp;
- 7a7:	89 15 1c 0b 00 00    	mov    %edx,0xb1c
+ 7a7:	89 15 18 0b 00 00    	mov    %edx,0xb18
 }
  7ad:	8d 65 f4             	lea    -0xc(%ebp),%esp
       return (void*)(p + 1);
@@ -1237,13 +1237,13 @@ malloc(uint nbytes)
  7b8:	90                   	nop
  7b9:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
     base.s.ptr = freep = prevp = &base;
- 7c0:	c7 05 1c 0b 00 00 20 	movl   $0xb20,0xb1c
+ 7c0:	c7 05 18 0b 00 00 1c 	movl   $0xb1c,0xb18
  7c7:	0b 00 00 
- 7ca:	c7 05 20 0b 00 00 20 	movl   $0xb20,0xb20
+ 7ca:	c7 05 1c 0b 00 00 1c 	movl   $0xb1c,0xb1c
  7d1:	0b 00 00 
     base.s.size = 0;
- 7d4:	b8 20 0b 00 00       	mov    $0xb20,%eax
- 7d9:	c7 05 24 0b 00 00 00 	movl   $0x0,0xb24
+ 7d4:	b8 1c 0b 00 00       	mov    $0xb1c,%eax
+ 7d9:	c7 05 20 0b 00 00 00 	movl   $0x0,0xb20
  7e0:	00 00 00 
  7e3:	e9 44 ff ff ff       	jmp    72c <malloc+0x2c>
  7e8:	90                   	nop

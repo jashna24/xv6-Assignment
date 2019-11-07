@@ -10,7 +10,7 @@ Disassembly of section .text:
 #include "stat.h"
 
 int main()
-{
+{	
    0:	8d 4c 24 04          	lea    0x4(%esp),%ecx
    4:	83 e4 f0             	and    $0xfffffff0,%esp
    7:	ff 71 fc             	pushl  -0x4(%ecx)
@@ -20,6 +20,7 @@ int main()
    e:	51                   	push   %ecx
    f:	bb e8 03 00 00       	mov    $0x3e8,%ebx
   14:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi
+	
 	for(int i=0;i<1000;i++)
 	{
 		printf(1,"1");

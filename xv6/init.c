@@ -25,8 +25,8 @@ main(void)
   #ifdef FCFS
     printf(1, "Scheduler policy: FCFS\n");
   #else
-  #ifdef PRIORITY
-    printf(1, "Scheduler policy: PRIORITY\n");
+  #ifdef PBS
+    printf(1, "Scheduler policy: PBS\n");
   #else
   #ifdef MLFQ
     printf(1, "Scheduler policy: MLFQ\n");
