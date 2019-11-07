@@ -132,8 +132,8 @@ found:
   p->pid = nextpid++;
 
   #ifdef PBS
-    p->priority = 60;
-    // p->priority = pr--;
+    // p->priority = 60;
+    p->priority = pr--;
   #endif
 
   p->stime = ticks;
