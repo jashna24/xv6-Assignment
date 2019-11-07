@@ -6,7 +6,7 @@
 int main(int argc, char *argv[])
 {
 	int pid,run_time,wait_time;
-	int status;
+	
 
 	pid = fork();
 
@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
 
 	else
 	{	
-		status = waitx(&wait_time, &run_time);
-		printf(1,"run time: %d, wait time: %d and status: %d\n",run_time,wait_time,status);
+		waitx(&wait_time, &run_time);
+		printf(1,"run time: %d, wait time: %d\n",run_time,wait_time);
 	}
 
 	exit();

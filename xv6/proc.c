@@ -133,7 +133,7 @@ found:
 
   #ifdef PBS
     p->priority = 60;
-    // p->priority = pr++;
+    // p->priority = pr--;
   #endif
 
   p->stime = ticks;
