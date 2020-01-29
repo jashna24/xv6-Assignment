@@ -132,7 +132,6 @@ found:
   p->pid = nextpid++;
 
   #ifdef PBS
-    // p->priority = p->pid/2;
     p->priority = 60;
   #endif
 

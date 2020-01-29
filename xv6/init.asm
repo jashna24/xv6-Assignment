@@ -39,11 +39,11 @@ main(void)
   33:	c7 04 24 00 00 00 00 	movl   $0x0,(%esp)
   3a:	e8 8b 03 00 00       	call   3ca <dup>
   #else
-  #ifdef FCFS
-    printf(1, "Scheduler policy: FCFS\n");
-  #else
   #ifdef PBS
     printf(1, "Scheduler policy: PBS\n");
+  #else
+  #ifdef MLFQ
+    printf(1, "Scheduler policy: MLFQ\n");
   3f:	58                   	pop    %eax
   40:	5a                   	pop    %edx
   41:	68 00 08 00 00       	push   $0x800
@@ -57,7 +57,7 @@ main(void)
   for(;;){
     printf(1, "init: starting sh\n");
   50:	83 ec 08             	sub    $0x8,%esp
-  53:	68 17 08 00 00       	push   $0x817
+  53:	68 18 08 00 00       	push   $0x818
   58:	6a 01                	push   $0x1
   5a:	e8 41 04 00 00       	call   4a0 <printf>
     pid = fork();
@@ -87,7 +87,7 @@ main(void)
   7b:	74 d3                	je     50 <main+0x50>
       printf(1, "zombie!\n");
   7d:	83 ec 08             	sub    $0x8,%esp
-  80:	68 56 08 00 00       	push   $0x856
+  80:	68 57 08 00 00       	push   $0x857
   85:	6a 01                	push   $0x1
   87:	e8 14 04 00 00       	call   4a0 <printf>
   8c:	83 c4 10             	add    $0x10,%esp
@@ -95,7 +95,7 @@ main(void)
       printf(1, "init: fork failed\n");
   91:	53                   	push   %ebx
   92:	53                   	push   %ebx
-  93:	68 2a 08 00 00       	push   $0x82a
+  93:	68 2b 08 00 00       	push   $0x82b
   98:	6a 01                	push   $0x1
   9a:	e8 01 04 00 00       	call   4a0 <printf>
       exit();
@@ -104,12 +104,12 @@ main(void)
   a4:	50                   	push   %eax
   a5:	50                   	push   %eax
   a6:	68 10 0b 00 00       	push   $0xb10
-  ab:	68 3d 08 00 00       	push   $0x83d
+  ab:	68 3e 08 00 00       	push   $0x83e
   b0:	e8 d5 02 00 00       	call   38a <exec>
       printf(1, "init: exec sh failed\n");
   b5:	5a                   	pop    %edx
   b6:	59                   	pop    %ecx
-  b7:	68 40 08 00 00       	push   $0x840
+  b7:	68 41 08 00 00       	push   $0x841
   bc:	6a 01                	push   $0x1
   be:	e8 dd 03 00 00       	call   4a0 <printf>
       exit();
@@ -1011,7 +1011,7 @@ printf(int fd, const char *fmt, ...)
  652:	31 ff                	xor    %edi,%edi
  654:	e9 8f fe ff ff       	jmp    4e8 <printf+0x48>
           s = "(null)";
- 659:	bb 5f 08 00 00       	mov    $0x85f,%ebx
+ 659:	bb 60 08 00 00       	mov    $0x860,%ebx
         while(*s != 0){
  65e:	b8 28 00 00 00       	mov    $0x28,%eax
  663:	e9 72 ff ff ff       	jmp    5da <printf+0x13a>
