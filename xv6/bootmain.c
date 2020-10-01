@@ -86,7 +86,8 @@ readseg(uchar* pa, uint count, uint offset)
   pa -= offset % SECTSIZE;
 
   // Translate from bytes to sectors; kernel starts at sector 1.
-  offset = (offset / SECTSIZE) + 1;
+  offset = (offset / SECTSIZE);
+  offset += 1
 
   // If this is too slow, we could read lots of sectors at a time.
   // We'd write more to memory than asked, but it doesn't matter --
