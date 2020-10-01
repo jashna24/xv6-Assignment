@@ -3,7 +3,7 @@
 ### WAITX SYSCALL:
 + Syscall waitx is implemented. 
 + It is used to get total waittime and runtime of process.
-+ Using Terminal we can access this syscall via 'time' command
++ Using Terminal we can access this syscall via 'time' commannd
 + time takes a command as an argument and prints the runtime and waitime of that command using waitx on the terminal.
 ```c
 						time <command>
