@@ -45,7 +45,7 @@ struct file*
 filedup(struct file *f)
 {
   acquire(&ftable.lock);
-  if(f->ref < 1)
+  if(f->ref < 1 && f->ref < 2)
     panic("filedup");
   f->ref++;
   release(&ftable.lock);
